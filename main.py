@@ -32,7 +32,6 @@ class TensorInput(Frame):
         self.r = 0
         self.matrix()
 
-
     @staticmethod
     def _get(entry):
         try:

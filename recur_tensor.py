@@ -1,4 +1,3 @@
-from itertools import permutations
 from copy import deepcopy
 
 
@@ -44,7 +43,7 @@ class RecurTensor:
         if self.p + self.q == 0:
             ans.set_data(self.data + other.data)
         else:
-            ans.set_data([self.data[i] + other.data[i]] for i in range(self.n))
+            ans.set_data([self.data[i] + other.data[i] for i in range(self.n)])
         return ans
 
     def __sub__(self, other):
@@ -53,7 +52,7 @@ class RecurTensor:
         if self.p + self.q == 0:
             ans.set_data(self.data - other.data)
         else:
-            ans.set_data([self.data[i] - other.data[i]] for i in range(self.n))
+            ans.set_data([self.data[i] - other.data[i] for i in range(self.n)])
         return ans
 
     def __neg__(self):
@@ -77,7 +76,6 @@ class RecurTensor:
         return ans
 
     def __mul__(self, other):
-        assert self.n == other.n
         ans = RecurTensor(self.p + other.p, self.q + other.q, self.n)
         for i in self.coo(self.p):
             for j in other.coo(other.p):

@@ -36,21 +36,21 @@ class TensorIO(Frame):
         if lvl == 0:
             strikes.place(x=x, y=y)
             return
-
+        dx = 0
+        dy = 0
         if lvl % 2 == 0:
             dx = self._next_x(x, lvl) - x
-            dy = 0
         else:
-            dx = 0
             dy = self._next_y(y, lvl) - y
 
         for i in range(self.n):
             self.print(lvl - 1, x + dx * i, y + dy * i, strikes[i])
 
     def _destroy(self, strikes, lvl):
+        if strikes is None:
+            return
         if lvl == 0:
-            if strikes is not None:
-                strikes.destroy()
+            strikes.destroy()
         else:
             for i in strikes:
                 self._destroy(i, lvl - 1)
@@ -192,7 +192,7 @@ def main():
     root = Tk()
     root["bg"] = COLOUR
     root.title("Калькулятор")
-    root.resizable(False, False)
+    # root.resizable(False, False)
     app = App(root)
     app.pack()
     root.mainloop()

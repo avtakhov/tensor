@@ -63,11 +63,11 @@ class RecurTensor:
             ans.set_data([-self.data[i] for i in range(self.n)])
         return ans
 
-    def coo(self, t):
+    def _coo(self, t):
         if t == 0:
             return [[]]
         ans = []
-        prev = self.coo(t - 1)
+        prev = self._coo(t - 1)
         for arr in prev:
             for i in range(self.n):
                 arr0 = deepcopy(arr)
@@ -77,11 +77,34 @@ class RecurTensor:
 
     def __mul__(self, other):
         ans = RecurTensor(self.p + other.p, self.q + other.q, self.n)
-        for i in self.coo(self.p):
+        for i in self._coo(self.p):
             for j in other.coo(other.p):
-                for k in self.coo(self.q):
+                for k in self._coo(self.q):
                     for l in other.coo(other.q):
                         ind = i + j + k + l
                         value = self.read(i + k) * other.read(j + l)
                         ans.write(ind, value)
+        return ans
+
+    def transpose(self, type, permutation):
+        permutation = list(map(lambda x: x - 1, permutation))
+        print(permutation)
+        ans = RecurTensor(self.p, self.q, self.n)
+
+        for i in self._coo(self.p):
+            for j in self._coo(self.q):
+                if type == 0:
+                    ind = [0] * self.p
+                    for x in range(self.p):
+                        ind[x] = i[permutation[x]]
+                    ind = ind + j
+                elif type == 1:
+                    ind = [0] * self.q
+                    for x in range(self.q):
+                        ind[x] = j[permutation[x]]
+                    ind = i + ind
+                else:
+                    ind = -1
+                ans.write(i + j, self.read(ind))
+
         return ans

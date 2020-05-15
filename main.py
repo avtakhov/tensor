@@ -1,7 +1,7 @@
 from tkinter import *
 
 from recur_tensor import RecurTensor
-from parser import Parser
+from easy_parser import parse
 
 
 class Point:
@@ -56,6 +56,15 @@ class TensorIO(Frame):
                 self._destroy(i, lvl - 1)
 
 
+def read_float(entry):
+    try:
+        return float(entry.get())
+    except ValueError:
+        return 0
+    except AttributeError:
+        return 0
+
+
 def read_int(entry):
     try:
         return int(entry.get())
@@ -87,11 +96,9 @@ class TensorInput(TensorIO):
         super().__init__(root)
 
     def _next_x(self, x, lvl):
-        # return x + self.WDTH * 5 + lvl * lvl * 12
         return x + self.WDTH * 5 + (lvl - 1) * lvl * 10
 
     def _next_y(self, y, lvl):
-        # return y + (lvl - 1) * lvl * 7 + 10
         return y + lvl * lvl * 8 + 10
 
     def fill_strikes(self, level):
@@ -110,7 +117,7 @@ class TensorInput(TensorIO):
 
     def _read_matrix(self, lvl, a, tensor):
         if lvl == 0:
-            return tensor.set_data(read_int(a))
+            return tensor.set_data(read_float(a))
         else:
             return [self._read_matrix(lvl - 1, a[i], tensor.data[i]) for i in range(self.n)]
 
@@ -129,13 +136,13 @@ class TensorOutput(TensorIO):
     def set_tensor(self, tensor):
         self._tensor = tensor
 
-    WDTH = 7
+    WDTH = 3
 
     def _next_x(self, x, lvl):
-        return x + self.WDTH * 5 + (lvl - 1) * lvl * 10
+        return x + self.WDTH * 5 + (lvl - 1) * lvl * 9
 
     def _next_y(self, y, lvl):
-        return y + lvl * lvl * 8 + 10
+        return y + lvl * lvl * 7 + 10
 
     def get_tensor(self):
         return self._tensor
@@ -165,7 +172,6 @@ class App(Frame):
         self._A = TensorInput(root, Point(10, 10))
         self._B = TensorInput(root, Point(610, 10))
         self._ANS = TensorOutput(root, Point(self._WDTH // 2, self._HGHT - 300))
-        self._parser = Parser()
 
         self._commands = Entry(width=50)
         self._calc = Button(text='Calculate', command=self._run_parser)
@@ -181,7 +187,8 @@ class App(Frame):
             "A": self._A.get_tensor(),
             "B": self._B.get_tensor()
         }
-        self._ANS.set_tensor(self._parser.parse(source, values))
+        self._ANS.set_tensor(parse(source, values.get('A'), values.get('B')))
+        # self._parser.parse(source, values))
         self._ANS.output_tensor()
 
 
@@ -192,7 +199,6 @@ def main():
     root = Tk()
     root["bg"] = COLOUR
     root.title("Калькулятор")
-    # root.resizable(False, False)
     app = App(root)
     app.pack()
     root.mainloop()

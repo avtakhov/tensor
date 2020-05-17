@@ -1,4 +1,5 @@
 from tkinter import *
+from fractions import Fraction
 
 from recur_tensor import RecurTensor
 from easy_parser import parse
@@ -56,13 +57,13 @@ class TensorIO(Frame):
                 self._destroy(i, lvl - 1)
 
 
-def read_float(entry):
+def read_fraction(entry):
     try:
-        return float(entry.get())
+        return Fraction(entry.get())
     except ValueError:
-        return 0
+        return Fraction(0)
     except AttributeError:
-        return 0
+        return Fraction(0)
 
 
 def read_int(entry):
@@ -117,7 +118,7 @@ class TensorInput(TensorIO):
 
     def _read_matrix(self, lvl, a, tensor):
         if lvl == 0:
-            return tensor.set_data(read_float(a))
+            return tensor.set_data(read_fraction(a))
         else:
             return [self._read_matrix(lvl - 1, a[i], tensor.data[i]) for i in range(self.n)]
 

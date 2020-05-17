@@ -1,4 +1,16 @@
 from copy import deepcopy
+from itertools import permutations
+from math import factorial
+from fractions import Fraction
+
+
+def count(perm):
+    ans = 0
+    for i in range(len(perm)):
+        for j in range(i + 1, len(perm)):
+            if perm[j] < perm[i]:
+                ans += 1
+    return ans
 
 
 class RecurTensor:
@@ -63,11 +75,11 @@ class RecurTensor:
             ans.set_data([-self.data[i] for i in range(self.n)])
         return ans
 
-    def _coo(self, t):
+    def coo(self, t):
         if t == 0:
             return [[]]
         ans = []
-        prev = self._coo(t - 1)
+        prev = self.coo(t - 1)
         for arr in prev:
             for i in range(self.n):
                 arr0 = deepcopy(arr)
@@ -77,28 +89,26 @@ class RecurTensor:
 
     def __mul__(self, other):
         ans = RecurTensor(self.p + other.p, self.q + other.q, self.n)
-        for i in self._coo(self.p):
+        for i in self.coo(self.p):
             for j in other.coo(other.p):
-                for k in self._coo(self.q):
+                for k in self.coo(self.q):
                     for l in other.coo(other.q):
                         ind = i + j + k + l
                         value = self.read(i + k) * other.read(j + l)
                         ans.write(ind, value)
         return ans
 
-    def transpose(self, type, permutation):
+    def transpose(self, arg, permutation):
         permutation = list(map(lambda x: x - 1, permutation))
-        print(permutation)
         ans = RecurTensor(self.p, self.q, self.n)
-
-        for i in self._coo(self.p):
-            for j in self._coo(self.q):
-                if type == 0:
+        for i in self.coo(self.p):
+            for j in self.coo(self.q):
+                if arg == 0:
                     ind = [0] * self.p
                     for x in range(self.p):
                         ind[x] = i[permutation[x]]
                     ind = ind + j
-                elif type == 1:
+                elif arg == 1:
                     ind = [0] * self.q
                     for x in range(self.q):
                         ind[x] = j[permutation[x]]
@@ -108,3 +118,15 @@ class RecurTensor:
                 ans.write(i + j, self.read(ind))
 
         return ans
+
+    def __xor__(self, other):
+        one = RecurTensor(0, 0, self.n)
+        e = self * other
+        one.set_data(Fraction((-1 ** (self.p * other.p)), factorial(e.p)))
+        ans = RecurTensor(e.p, e.q, e.n)
+        for i in permutations(list(range(1, e.p + 1))):
+            if count(i) % 2 == 0:
+                ans += e.transpose(0, i)
+            else:
+                ans -= e.transpose(0, i)
+        return one * ans

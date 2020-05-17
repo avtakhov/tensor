@@ -122,7 +122,8 @@ class RecurTensor:
     def __xor__(self, other):
         one = RecurTensor(0, 0, self.n)
         e = self * other
-        one.set_data(Fraction((-1 ** (self.p * other.p)), factorial(e.p)))
+        one.set_data(
+            Fraction(factorial(self.p + other.p), factorial(self.p) * factorial(other.p)) * Fraction(1, factorial(e.p)))
         ans = RecurTensor(e.p, e.q, e.n)
         for i in permutations(list(range(1, e.p + 1))):
             if count(i) % 2 == 0:
